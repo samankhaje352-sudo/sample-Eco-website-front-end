@@ -103,7 +103,7 @@ export default function OrderPage({ params }: { params: Promise<{ number: string
       </div>
       <p className="mt-2 text-sm text-ink-muted">
         ثبت شده در {toPersianDigits(order.created_at_jalali)}
-        {order.paid_at ? `، پرداخت در ${toPersianDigits(order.paid_at)}` : ""}
+        {order.paid_at ? `، پرداخت در ${new Intl.DateTimeFormat("fa-IR-u-ca-persian", { dateStyle: "short" }).format(new Date(order.paid_at))}` : ""}
       </p>
 
       {order.status === "pending" ? (
