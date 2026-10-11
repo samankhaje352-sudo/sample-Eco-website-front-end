@@ -1,29 +1,72 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useRequireAuth } from "@/components/useRequireAuth";
-import { useAuthStore } from "@/stores/authStore";
+import { useState, type FormEvent } from "react";
+import { api, ApiError } from "@/lib/api";
+import { Button, Input, InlineAlert, useToast } from "@/components/ui";
 import { toPersianDigits } from "@/lib/format";
+import { useAuthStore } from "@/stores/authStore";
 
 export default function ProfilePage() {
-  const ready = useRequireAuth();
-  const router = useRouter();
   const user = useAuthStore((s) => s.user);
-  const logout = useAuthStore((s) => s.logout);
-  if (!ready) return <p>در حال بارگذاری…</p>;
+  const toast = useToast();
+  const [first, setFirst] = useState(user?.first_name ?? "");
+  const [last, setLast] = useState(user?.last_name ?? "");
+  const [email, setEmail] = useState(user?.email ?? "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  async function onSubmit(e: FormEvent) {
+    e.preventDefault();
+    setSaving(true);
+    setError("");
+    try {
+      const updated = await api.auth.updateMe({
+        first_name: first.trim(),
+        last_name: last.trim(),
+        email: email.trim(),
+      });
+      useAuthStore.setState({ user: updated });
+      toast.success("اطلاعات شما ذخیره شد.");
+    } catch (err) {
+      if (err instanceof ApiError && err.status !== 0) setError(err.message);
+      else toast.error("ارتباط با سرور برقرار نشد. دوباره تلاش کنید.");
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
-    <div className="space-y-2">
-      <h1 className="font-bold">حساب من</h1>
-      <p>{[user?.first_name, user?.last_name].filter(Boolean).join(" ") || "—"}</p>
-      <p dir="ltr" className="text-right">{user ? toPersianDigits(user.phone) : ""}</p>
-      <ul>
-        <li><Link href="/profile/orders">سفارش‌ها</Link></li>
-        <li><Link href="/profile/wishlist">علاقه‌مندی‌ها</Link></li>
-        <li><Link href="/profile/addresses">آدرس‌ها</Link></li>
-      </ul>
-      <button type="button" className="border px-2" onClick={() => { logout(); router.replace("/"); }}>خروج</button>
+    <div>
+      <h1 className="mb-6 text-xl font-bold text-ink md:text-2xl">اطلاعات حساب</h1>
+      <form onSubmit={onSubmit} className="rounded-lg border border-border bg-surface p-5 md:p-6">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Input label="نام" value={first} onChange={(e) => setFirst(e.target.value)} autoComplete="given-name" />
+          <Input label="نام خانوادگی" value={last} onChange={(e) => setLast(e.target.value)} autoComplete="family-name" />
+          <Input
+            label="ایمیل"
+            optional
+            type="email"
+            dir="ltr"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            autoComplete="email"
+          />
+          <Input
+            label="شماره موبایل"
+            dir="ltr"
+            disabled
+            value={user ? toPersianDigits(user.phone) : ""}
+            readOnly
+            helper="شماره موبایل قابل تغییر نیست."
+          />
+        </div>
+        {error ? <InlineAlert kind="error" className="mt-4">{error}</InlineAlert> : null}
+        <div className="mt-5 flex justify-end">
+          <Button type="submit" loading={saving}>
+            {saving ? "در حال ذخیره" : "ذخیره تغییرات"}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 }
