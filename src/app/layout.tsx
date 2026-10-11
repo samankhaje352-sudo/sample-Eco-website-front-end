@@ -12,17 +12,17 @@ const vazirmatn = Vazirmatn({
 });
 
 export const metadata: Metadata = {
-  title: "فروشگاه لباس",
+  title: "پود | فروشگاه پوشاک",
   description: "فروشگاه اینترنتی پوشاک",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fa" dir="rtl">
-      <body className={`${vazirmatn.variable} flex min-h-screen flex-col`}>
+      <body className={`${vazirmatn.variable} flex min-h-dvh flex-col bg-bg text-ink antialiased`}>
         <Providers>
           <Header />
-          <main className="mx-auto w-full max-w-5xl flex-1 p-4">{children}</main>
+          <main className="flex-1">{children}</main>
           <Footer />
         </Providers>
       </body>

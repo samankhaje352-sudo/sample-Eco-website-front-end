@@ -12,10 +12,15 @@ export function toEnglishDigits(input: string): string {
     .replace(/[٠-٩]/g, (d) => String(AR.indexOf(d)));
 }
 
+/** 1290000 -> "۱٬۲۹۰٬۰۰۰" (Persian digits and separators, no currency word) */
+export function formatNumber(n: number): string {
+  const grouped = Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "٬");
+  return toPersianDigits(grouped);
+}
+
 /** 1290000 -> "۱٬۲۹۰٬۰۰۰ تومان" */
 export function formatPrice(n: number): string {
-  const grouped = Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, "٬");
-  return `${toPersianDigits(grouped)} تومان`;
+  return `${formatNumber(n)} تومان`;
 }
 
 export const PHONE_RE = /^09\d{9}$/;

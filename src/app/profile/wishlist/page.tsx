@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api, type ProductList } from "@/lib/api";
-import ProductListPlain from "@/components/ProductList";
+import ProductGrid from "@/components/ProductGrid";
 import { useRequireAuth } from "@/components/useRequireAuth";
 import { useWishlistStore } from "@/stores/wishlistStore";
 
@@ -20,7 +20,7 @@ export default function WishlistPage() {
   return (
     <div className="space-y-2">
       <h1 className="font-bold">علاقه‌مندی‌ها</h1>
-      <ProductListPlain products={items} />
+      <ProductGrid products={items} layout="three" />
       <ul>
         {items.map((p) => (
           <li key={p.id}>{p.name} <button type="button" onClick={() => toggle(p.id)}>حذف</button></li>

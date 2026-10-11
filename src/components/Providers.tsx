@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useAuthStore } from "@/stores/authStore";
 import { useCartStore } from "@/stores/cartStore";
 import { useWishlistStore } from "@/stores/wishlistStore";
+import { ToastProvider } from "@/components/ui";
 
 /** Rehydrates persisted stores on the client and keeps cart/wishlist in sync with auth. */
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -34,5 +35,5 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     return unsub;
   }, []);
 
-  return <>{children}</>;
+  return <ToastProvider>{children}</ToastProvider>;
 }

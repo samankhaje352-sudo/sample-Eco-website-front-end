@@ -1,10 +1,151 @@
 @import "tailwindcss";
 
-/* Placeholder only: colors, typography and component looks come from DESIGN.md. */
-@theme inline {
-  --font-sans: var(--font-vazirmatn), sans-serif;
+/* Runtime tokens. Light is default; dark is a token swap only. */
+:root {
+  color-scheme: light;
+  --bg: #F4F5F5;              /* page background */
+  --surface: #FCFCFC;         /* cards, inputs, header, sheets */
+  --surface-muted: #E9ECEC;   /* image wells, skeletons, footer, chips */
+  --ink: #15191A;             /* primary text */
+  --ink-muted: #545C5F;       /* secondary text, meta */
+  --ink-subtle: #656D70;      /* placeholders, struck prices; only on bg/surface */
+  --border: #DCE0E1;          /* dividers, card outlines (decorative) */
+  --border-strong: #858E91;   /* input/select/control borders (3:1 non-text) */
+  --primary: #15191A;         /* main CTA fill (ink black) */
+  --primary-hover: #2A3032;
+  --primary-contrast: #FCFCFC;
+  --accent: #0B6B66;          /* links, selected state, focus ring, info */
+  --accent-strong: #08524E;   /* accent text on accent-soft, accent hover */
+  --accent-soft: #DDEEEC;
+  --accent-contrast: #FCFCFC;
+  --sale: #C0352B;            /* discounted price + percent badge ONLY */
+  --sale-soft: #FBE7E4;
+  --sale-contrast: #FCFCFC;
+  --success: #1E7346;
+  --success-soft: #E2F2E8;
+  --warning: #8F5300;
+  --warning-soft: #FBEED9;
+  --danger: #B42318;
+  --danger-soft: #FCE8E6;
+  --overlay: rgb(21 25 26 / 0.45);
+  --shadow-color: 192 10% 10%;
 }
 
-body {
-  font-family: var(--font-vazirmatn), sans-serif;
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+    --bg: #0F1213;
+    --surface: #171B1C;
+    --surface-muted: #22282A;
+    --ink: #ECEFEF;
+    --ink-muted: #A4ADAF;
+    --ink-subtle: #869093;
+    --border: #2D3436;
+    --border-strong: #5E686B;
+    --primary: #ECEFEF;
+    --primary-hover: #D9DEDF;
+    --primary-contrast: #15191A;
+    --accent: #4DB6AD;
+    --accent-strong: #7FD3CB;
+    --accent-soft: #16302E;
+    --accent-contrast: #0F1213;
+    --sale: #FF7B6E;
+    --sale-soft: #3A1D1A;
+    --sale-contrast: #15191A;
+    --success: #5CC98C;
+    --success-soft: #16301F;
+    --warning: #F2B45A;
+    --warning-soft: #35270F;
+    --danger: #FF8A80;
+    --danger-soft: #3A1A18;
+    --overlay: rgb(0 0 0 / 0.6);
+    --shadow-color: 200 20% 2%;
+  }
 }
+
+@theme inline {
+  --font-sans: var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-subtle: var(--ink-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-contrast: var(--primary-contrast);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-contrast: var(--accent-contrast);
+  --color-sale: var(--sale);
+  --color-sale-soft: var(--sale-soft);
+  --color-sale-contrast: var(--sale-contrast);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-overlay: var(--overlay);
+
+  --shadow-card: 0 1px 2px hsl(var(--shadow-color) / 0.06), 0 2px 8px -2px hsl(var(--shadow-color) / 0.08);
+  --shadow-pop: 0 4px 12px -2px hsl(var(--shadow-color) / 0.12), 0 16px 40px -8px hsl(var(--shadow-color) / 0.18);
+}
+
+@theme {
+  /* Type scale tuned for Vazirmatn (tall Persian ascenders/descenders need loose leading). */
+  --text-xs: 0.75rem;   --text-xs--line-height: 1.25rem;   /* 12/20 meta, badges */
+  --text-sm: 0.875rem;  --text-sm--line-height: 1.5rem;    /* 14/24 card names, labels, buttons */
+  --text-base: 1rem;    --text-base--line-height: 1.75rem; /* 16/28 body, inputs */
+  --text-lg: 1.125rem;  --text-lg--line-height: 1.875rem;  /* 18/30 prices on PDP, sub-heads */
+  --text-xl: 1.25rem;   --text-xl--line-height: 2rem;      /* 20/32 section titles mobile */
+  --text-2xl: 1.5rem;   --text-2xl--line-height: 2.25rem;  /* 24/36 section titles, PDP name mobile */
+  --text-3xl: 1.875rem; --text-3xl--line-height: 2.625rem; /* 30/42 page H1 desktop, hero mobile */
+  --text-4xl: 2.25rem;  --text-4xl--line-height: 3.125rem; /* 36/50 hero tablet */
+  --text-5xl: 3rem;     --text-5xl--line-height: 4rem;     /* 48/64 hero desktop (max) */
+
+  --radius-sm: 6px;    /* badges, swatch-check, small chips */
+  --radius-md: 10px;   /* buttons, inputs, selects, size chips, thumbnails */
+  --radius-lg: 16px;   /* cards, product images, panels, sheets, tiles */
+
+  --container-page: 80rem;  /* max-w-page = 1280px */
+  --container-prose: 40rem; /* max-w-prose = ~65ch body copy */
+
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html { background: var(--bg); }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-vazirmatn), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: var(--accent-soft); color: var(--ink); }
+
+/* Global focus style for anything focusable that has no custom recipe. */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Hide scrollbar on horizontal rails only (class: rail). */
+.rail { scrollbar-width: none; }
+.rail::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* DESIGN.md 3.3: all lucide icons use a 1.75 stroke. */
+.lucide { stroke-width: 1.75; }

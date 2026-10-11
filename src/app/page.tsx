@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { api } from "@/lib/api";
-import ProductListPlain from "@/components/ProductList";
+import ProductGrid from "@/components/ProductGrid";
 
 export const dynamic = "force-dynamic"; // do not require the API at build time
 
@@ -18,11 +18,11 @@ export default async function HomePage() {
       </section>
       <section>
         <h2 className="mb-2 font-bold">تازه‌ها</h2>
-        <ProductListPlain products={home.new_arrivals} />
+        <ProductGrid products={home.new_arrivals} />
       </section>
       <section>
         <h2 className="mb-2 font-bold">تخفیف‌دارها</h2>
-        <ProductListPlain products={home.discounted} />
+        <ProductGrid products={home.discounted} />
       </section>
     </div>
   );

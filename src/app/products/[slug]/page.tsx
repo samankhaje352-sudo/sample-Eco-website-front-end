@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { api, ApiError } from "@/lib/api";
 import AddToCart from "@/components/AddToCart";
-import ProductListPlain from "@/components/ProductList";
+import ProductGrid from "@/components/ProductGrid";
 import { formatPrice } from "@/lib/format";
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -25,7 +25,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <p>تعداد تصاویر: {product.images.length}</p>
       <AddToCart product={product} />
       <h2 className="font-bold">محصولات مرتبط</h2>
-      <ProductListPlain products={product.related} />
+      <ProductGrid products={product.related} layout="four" />
     </div>
   );
 }

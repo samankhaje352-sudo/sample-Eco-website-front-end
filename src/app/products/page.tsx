@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { api, type ProductQuery } from "@/lib/api";
-import ProductListPlain from "@/components/ProductList";
+import ProductGrid from "@/components/ProductGrid";
 import { toEnglishDigits, toPersianDigits } from "@/lib/format";
 
 type SP = Record<string, string | string[] | undefined>;
@@ -57,7 +57,7 @@ export default async function ProductsPage({ searchParams }: { searchParams: Pro
         <label><input type="checkbox" name="in_stock" value="1" defaultChecked={query.in_stock === "1"} /> فقط موجود</label>
         <button className="border px-2">اعمال</button>
       </form>
-      <ProductListPlain products={data.results} />
+      <ProductGrid products={data.results} layout="three" />
       <p className="flex gap-4">
         {data.previous && <Link href={pageHref(page - 1)}>قبلی</Link>}
         {data.next && <Link href={pageHref(page + 1)}>بعدی</Link>}
