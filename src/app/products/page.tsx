@@ -1,67 +1,69 @@
-import Link from "next/link";
-import { api, type ProductQuery } from "@/lib/api";
+import type { Metadata } from "next";
+import { SearchX } from "lucide-react";
+import { api, ApiError, type Paginated, type ProductList } from "@/lib/api";
+import { toPersianDigits } from "@/lib/format";
 import ProductGrid from "@/components/ProductGrid";
-import { toEnglishDigits, toPersianDigits } from "@/lib/format";
+import { Breadcrumb, Button, Container, EmptyState, Pagination } from "@/components/ui";
+import CatalogShell from "@/components/catalog/CatalogShell";
+import ClearFiltersButton from "@/components/catalog/ClearFiltersButton";
+import { PAGE_SIZE, countActiveFilters, flattenCategories, hrefWith, parseQuery } from "@/components/catalog/params";
+
+export const metadata: Metadata = { title: "محصولات | پود" };
 
 type SP = Record<string, string | string[] | undefined>;
-const KEYS = ["search", "category", "min_price", "max_price", "size", "color", "in_stock", "ordering", "page"] as const;
 
 export default async function ProductsPage({ searchParams }: { searchParams: Promise<SP> }) {
-  const sp = await searchParams;
-  const query: ProductQuery = {};
-  for (const k of KEYS) {
-    const v = Array.isArray(sp[k]) ? sp[k]![0] : sp[k];
-    if (v) (query as Record<string, string>)[k] = toEnglishDigits(v);
-  }
+  const query = parseQuery(await searchParams);
 
   const [data, filters, categories] = await Promise.all([
-    api.catalog.products(query, { revalidate: 60 }),
+    api.catalog.products(query, { revalidate: 60 }).catch((e): Paginated<ProductList> => {
+      // A page number beyond the last one is a 404 from the API: show it as an empty result.
+      if (e instanceof ApiError && e.status === 404) return { count: 0, next: null, previous: null, results: [] };
+      throw e;
+    }),
     api.catalog.filters({ revalidate: 60 }),
     api.catalog.categories({ revalidate: 60 }),
   ]);
 
-  const page = Number(query.page ?? 1);
-  const pageHref = (p: number) => {
-    const u = new URLSearchParams(query as Record<string, string>);
-    u.set("page", String(p));
-    return `/products?${u.toString()}`;
-  };
+  const category = query.category ? flattenCategories(categories).find((c) => c.slug === query.category) : undefined;
+  const title = category?.name ?? (query.search ? `نتایج جستجو برای «${query.search}»` : "همه محصولات");
+  const page = Math.max(1, Number(query.page ?? 1) || 1);
+  const pageCount = Math.ceil(data.count / PAGE_SIZE);
+  const filtered = countActiveFilters(query) > 0;
 
   return (
-    <div className="space-y-4">
-      <h1 className="font-bold">محصولات ({toPersianDigits(data.count)})</h1>
-      <form method="get" className="flex flex-wrap items-end gap-2">
-        <input name="search" defaultValue={query.search} placeholder="جستجو" className="border" />
-        <select name="category" defaultValue={query.category ?? ""}>
-          <option value="">همه دسته‌ها</option>
-          {categories.flatMap((c) => [c, ...c.children]).map((c) => (
-            <option key={c.id} value={c.slug}>{c.name}</option>
-          ))}
-        </select>
-        <select name="size" defaultValue={query.size ?? ""}>
-          <option value="">همه سایزها</option>
-          {filters.sizes.map((s) => <option key={s} value={s}>{s}</option>)}
-        </select>
-        <select name="color" defaultValue={query.color ?? ""}>
-          <option value="">همه رنگ‌ها</option>
-          {filters.colors.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
-        </select>
-        <input name="min_price" defaultValue={query.min_price} placeholder={`حداقل (${filters.price_range.min})`} className="w-28 border" />
-        <input name="max_price" defaultValue={query.max_price} placeholder={`حداکثر (${filters.price_range.max})`} className="w-28 border" />
-        <select name="ordering" defaultValue={query.ordering ?? "newest"}>
-          <option value="newest">جدیدترین</option>
-          <option value="price">ارزان‌ترین</option>
-          <option value="-price">گران‌ترین</option>
-          <option value="discount">بیشترین تخفیف</option>
-        </select>
-        <label><input type="checkbox" name="in_stock" value="1" defaultChecked={query.in_stock === "1"} /> فقط موجود</label>
-        <button className="border px-2">اعمال</button>
-      </form>
-      <ProductGrid products={data.results} layout="three" />
-      <p className="flex gap-4">
-        {data.previous && <Link href={pageHref(page - 1)}>قبلی</Link>}
-        {data.next && <Link href={pageHref(page + 1)}>بعدی</Link>}
-      </p>
-    </div>
+    <Container className="pb-16 pt-6 md:pt-10">
+      <Breadcrumb
+        items={[
+          { label: "خانه", href: "/" },
+          { label: "محصولات", href: category ? "/products" : undefined },
+          ...(category ? [{ label: category.name }] : []),
+        ]}
+      />
+      <h1 className="mt-4 text-2xl font-bold text-ink md:text-3xl">{title}</h1>
+      <p className="mt-1 text-sm text-ink-muted">{toPersianDigits(data.count)} محصول</p>
+
+      <CatalogShell filters={filters} categories={categories}>
+        {data.results.length === 0 ? (
+          <EmptyState
+            icon={SearchX}
+            title="محصولی با این مشخصات پیدا نشد"
+            body="فیلترها را تغییر دهید یا عبارت دیگری را جستجو کنید."
+            action={
+              filtered ? (
+                <ClearFiltersButton />
+              ) : (
+                <Button href="/products">مشاهده همه محصولات</Button>
+              )
+            }
+          />
+        ) : (
+          <>
+            <ProductGrid products={data.results} layout="three" priorityCount={4} />
+            <Pagination page={page} pageCount={pageCount} hrefFor={(p) => hrefWith(query, { page: p })} />
+          </>
+        )}
+      </CatalogShell>
+    </Container>
   );
 }
