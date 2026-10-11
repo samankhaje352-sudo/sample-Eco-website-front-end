@@ -1,66 +1,144 @@
 "use client";
 
+import { MapPin, Pencil, Plus, RotateCw, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { api, ApiError, type Address, type AddressInput } from "@/lib/api";
+import { api, type Address } from "@/lib/api";
+import { Button, EmptyState, InlineAlert, Skeleton, useToast } from "@/components/ui";
+import AddressForm from "@/components/checkout/AddressForm";
+import AddressMeta from "@/components/checkout/AddressMeta";
 import { useRequireAuth } from "@/components/useRequireAuth";
-import { isValidPhone, normalizePhone } from "@/lib/format";
-
-const EMPTY: AddressInput = {
-  title: "", receiver_name: "", receiver_phone: "", province: "",
-  city: "", postal_code: "", address_line: "",
-};
 
 export default function AddressesPage() {
   const ready = useRequireAuth();
+  const toast = useToast();
   const [list, setList] = useState<Address[] | null>(null);
-  const [form, setForm] = useState<AddressInput>(EMPTY);
-  const [error, setError] = useState("");
+  const [failed, setFailed] = useState(false);
+  /** "new", an address id being edited, or null. */
+  const [editing, setEditing] = useState<"new" | number | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
-  const load = useCallback(() => api.addresses.list().then(setList).catch(() => setList([])), []);
-  useEffect(() => { if (ready) void load(); }, [ready, load]);
-
-  async function create(e: React.FormEvent) {
-    e.preventDefault();
-    setError("");
-    if (!isValidPhone(form.receiver_phone)) return setError("شماره موبایل گیرنده معتبر نیست.");
+  const load = useCallback(async () => {
+    setFailed(false);
     try {
-      await api.addresses.create({ ...form, receiver_phone: normalizePhone(form.receiver_phone) });
-      setForm(EMPTY);
-      await load();
-    } catch (err) {
-      setError(err instanceof ApiError ? err.message : "خطایی رخ داد.");
+      setList(await api.addresses.list());
+    } catch {
+      setFailed(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (ready) void load();
+  }, [ready, load]);
+
+  async function del(id: number) {
+    setDeleting(true);
+    try {
+      await api.addresses.remove(id);
+      setList((l) => (l ?? []).filter((a) => a.id !== id));
+      setConfirmId(null);
+      toast.success("آدرس حذف شد.");
+    } catch {
+      toast.error("ارتباط با سرور برقرار نشد. دوباره تلاش کنید.");
+    } finally {
+      setDeleting(false);
     }
   }
 
-  async function del(id: number) {
-    await api.addresses.remove(id).catch(() => {});
-    await load();
+  function saved(a: Address) {
+    setList((l) => {
+      const cur = l ?? [];
+      return cur.some((x) => x.id === a.id) ? cur.map((x) => (x.id === a.id ? a : x)) : [...cur, a];
+    });
+    setEditing(null);
+    toast.success("آدرس ذخیره شد.");
   }
 
-  if (!ready || !list) return <p>در حال بارگذاری…</p>;
-  const labels: [keyof AddressInput, string][] = [
-    ["title", "عنوان"], ["receiver_name", "نام گیرنده"], ["receiver_phone", "موبایل گیرنده"],
-    ["province", "استان"], ["city", "شهر"], ["postal_code", "کد پستی"], ["address_line", "نشانی"],
-  ];
+  const empty = list !== null && list.length === 0 && editing !== "new";
+  const addButton = (
+    <Button variant="secondary" iconStart={<Plus />} onClick={() => { setEditing("new"); setConfirmId(null); }}>
+      افزودن آدرس جدید
+    </Button>
+  );
+
   return (
-    <div className="space-y-4">
-      <h1 className="font-bold">آدرس‌ها</h1>
-      <ul>
-        {list.map((a) => (
-          <li key={a.id}>
-            {a.title}: {a.receiver_name}، {a.province}، {a.city}، {a.address_line}{" "}
-            <button type="button" onClick={() => del(a.id)}>حذف</button>
-          </li>
-        ))}
-      </ul>
-      <form onSubmit={create} className="flex flex-wrap gap-2">
-        {labels.map(([k, l]) => (
-          <input key={k} value={form[k]} placeholder={l} required className="border"
-            onChange={(e) => setForm({ ...form, [k]: e.target.value })} />
-        ))}
-        <button className="border px-2">افزودن</button>
-      </form>
-      {error && <p role="alert">{error}</p>}
+    <div>
+      <div className="mb-6 flex items-center justify-between gap-3">
+        <h1 className="text-xl font-bold text-ink md:text-2xl">آدرس‌ها</h1>
+        {list && !empty && editing !== "new" && addButton}
+      </div>
+
+      {failed ? (
+        <InlineAlert
+          kind="error"
+          action={
+            <Button variant="secondary" size="sm" iconStart={<RotateCw />} onClick={() => void load()}>
+              تلاش دوباره
+            </Button>
+          }
+        >
+          بارگذاری اطلاعات با خطا مواجه شد.
+        </InlineAlert>
+      ) : !ready || list === null ? (
+        <div role="status" aria-label="در حال بارگذاری" className="grid gap-3 md:grid-cols-2">
+          <Skeleton className="h-40 rounded-lg" />
+          <Skeleton className="h-40 rounded-lg" />
+        </div>
+      ) : empty ? (
+        <EmptyState
+          icon={MapPin}
+          title="هنوز آدرسی ثبت نکرده‌اید"
+          body="برای سریع‌تر شدن خرید، آدرس خود را اضافه کنید."
+          action={
+            <Button iconStart={<Plus />} onClick={() => setEditing("new")}>
+              افزودن آدرس جدید
+            </Button>
+          }
+        />
+      ) : (
+        <div className="grid gap-3 md:grid-cols-2">
+          {editing === "new" && (
+            <div className="md:col-span-2">
+              <AddressForm onSaved={saved} onCancel={() => setEditing(null)} />
+            </div>
+          )}
+          {list.map((a) =>
+            editing === a.id ? (
+              <div key={a.id} className="md:col-span-2">
+                <AddressForm initial={a} onSaved={saved} onCancel={() => setEditing(null)} />
+              </div>
+            ) : (
+              <article key={a.id} className="rounded-lg border border-border bg-surface p-5">
+                <h2 className="text-sm font-bold text-ink">{a.title}</h2>
+                <AddressMeta address={a} />
+                <div className="mt-4 flex items-center gap-2 border-t border-border pt-3">
+                  {confirmId === a.id ? (
+                    <>
+                      <span className="me-auto text-sm text-ink">این آدرس حذف شود؟</span>
+                      <Button variant="danger-ghost" size="sm" loading={deleting} onClick={() => void del(a.id)}>
+                        بله، حذف شود
+                      </Button>
+                      <Button variant="ghost" size="sm" disabled={deleting} onClick={() => setConfirmId(null)}>
+                        انصراف
+                      </Button>
+                    </>
+                  ) : (
+                    <>
+                      <Button variant="ghost" size="sm" iconStart={<Pencil />}
+                        onClick={() => { setEditing(a.id); setConfirmId(null); }}>
+                        ویرایش
+                      </Button>
+                      <Button variant="danger-ghost" size="sm" iconStart={<Trash2 />} onClick={() => setConfirmId(a.id)}>
+                        حذف
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </article>
+            ),
+          )}
+        </div>
+      )}
     </div>
   );
 }
