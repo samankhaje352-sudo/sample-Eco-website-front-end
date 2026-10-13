@@ -41,7 +41,7 @@ export default function PostBody({ body }: { body: string }) {
       {parseBody(body).map((b, i) => {
         if (b.type === "ul") {
           return (
-            <ul key={i} className="list-disc space-y-2 ps-6 marker:text-accent">
+            <ul key={i} className="list-disc space-y-2 rounded-lg bg-surface ps-10 pe-5 py-4 marker:text-accent">
               {b.items.map((item, j) => (
                 <li key={j}>{item}</li>
               ))}
@@ -50,7 +50,7 @@ export default function PostBody({ body }: { body: string }) {
         }
         if (b.type === "h2") {
           return (
-            <h2 key={i} className="mt-6 text-xl font-bold text-ink md:text-2xl">
+            <h2 key={i} className="mt-5 border-t border-border pt-8 text-xl font-bold text-ink md:text-2xl">
               {b.text}
             </h2>
           );

@@ -1,10 +1,14 @@
-import { ArrowLeft, RefreshCcw, RotateCw, ShieldCheck, Truck } from "lucide-react";
+import { RefreshCcw, RotateCw, ShieldCheck, Truck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { api, type HomeData, type ProductList } from "@/lib/api";
+import { api, type Category, type HomeData, type PostList, type ProductList } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import ProductGrid from "@/components/ProductGrid";
 import DiscountRail from "@/components/product/DiscountRail";
+import BrandStory from "@/components/home/BrandStory";
+import CategoryBento from "@/components/home/CategoryBento";
+import Faq from "@/components/home/Faq";
+import FromBlog from "@/components/home/FromBlog";
 import { Button, Container, InlineAlert, SectionHeader } from "@/components/ui";
 
 export const dynamic = "force-dynamic"; // do not require the API at build time
@@ -27,7 +31,7 @@ function HeroVisual({ products }: { products: ProductList[] }) {
           key={p.id}
           href={`/products/${p.slug}`}
           className={cn(
-            "absolute block aspect-[4/5] overflow-hidden rounded-lg bg-surface-muted shadow-card transition-transform duration-200 motion-safe:hover:-translate-y-1",
+            "well-edge absolute block aspect-[4/5] overflow-hidden rounded-lg bg-surface-muted shadow-card transition-transform duration-200 motion-safe:hover:-translate-y-1",
             single ? "start-1/2 top-0 w-[46%] -translate-x-1/2 rtl:translate-x-1/2" : HERO_SLOTS[i].cls,
           )}
         >
@@ -45,64 +49,26 @@ function HeroVisual({ products }: { products: ProductList[] }) {
   );
 }
 
-const TILES = [
-  "bg-primary text-primary-contrast hover:bg-primary-hover",
-  "bg-accent-soft text-ink",
-  "bg-surface-muted text-ink",
-];
-
-function CategoryBento({ categories }: { categories: HomeData["categories"] }) {
-  const cats = categories.slice(0, 3);
-  if (cats.length === 0) return null;
-  return (
-    <section className="py-10 md:py-16">
-      <SectionHeader title="خرید بر اساس دسته‌بندی" />
-      <div className="grid grid-cols-2 gap-3 md:h-[28rem] md:grid-cols-3 md:grid-rows-2 md:gap-5">
-        {cats.map((c, i) => (
-          <Link
-            key={c.id}
-            href={`/products?category=${c.slug}`}
-            className={cn(
-              "group relative flex flex-col justify-between overflow-hidden rounded-lg p-5 transition-colors md:p-7",
-              TILES[i],
-              i === 0 ? "col-span-2 min-h-56 md:col-span-2 md:row-span-2" : "col-span-1 min-h-40",
-            )}
-          >
-            {c.image && (
-              <Image
-                src={c.image}
-                alt=""
-                width={400}
-                height={500}
-                sizes="30vw"
-                className="absolute bottom-0 end-0 z-0 aspect-[4/5] h-[85%] w-auto object-contain"
-              />
-            )}
-            <span className={cn("relative z-10 text-2xl font-extrabold md:text-3xl", i === 0 && "md:text-4xl")}>
-              {c.name}
-            </span>
-            <span className="relative z-10 inline-flex items-center gap-1.5 text-sm font-medium">
-              مشاهده محصولات
-              <ArrowLeft
-                className="size-4 transition-transform duration-200 motion-safe:group-hover:-translate-x-1"
-                strokeWidth={1.75}
-                aria-hidden
-              />
-            </span>
-          </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
-
 const SERVICES = [
   { Icon: Truck, title: "ارسال رایگان", sub: "برای خریدهای بالای ۱ میلیون تومان" },
   { Icon: RefreshCcw, title: "تعویض سایز", sub: "تا ۷ روز پس از تحویل" },
   { Icon: ShieldCheck, title: "پرداخت امن", sub: "از طریق درگاه بانکی" },
 ];
 
+/** Optional extras: a failure hides only the part that needs them. */
+async function soft<T>(p: Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await p;
+  } catch {
+    return fallback;
+  }
+}
+
 export default async function HomePage() {
+  const extras = Promise.all([
+    soft<Category[]>(api.catalog.categories(), []),
+    soft<PostList[]>(api.blog.posts().then((r) => r.results), []),
+  ]);
   let home: HomeData;
   try {
     home = await api.catalog.home({ revalidate: 60 });
@@ -122,6 +88,8 @@ export default async function HomePage() {
       </Container>
     );
   }
+
+  const [tree, posts] = await extras;
 
   return (
     <>
@@ -148,7 +116,7 @@ export default async function HomePage() {
       </Container>
 
       <Container>
-        <CategoryBento categories={home.categories} />
+        <CategoryBento categories={home.categories} tree={tree} />
 
         {home.new_arrivals.length > 0 && (
           <section className="py-10 md:py-16">
@@ -178,11 +146,16 @@ export default async function HomePage() {
         </Container>
       </div>
 
-      {home.discounted.length > 0 && (
-        <Container className="py-10 md:py-16">
-          <DiscountRail products={home.discounted} />
-        </Container>
-      )}
+      <Container>
+        {home.discounted.length > 0 && (
+          <section className="py-10 md:py-16">
+            <DiscountRail products={home.discounted} />
+          </section>
+        )}
+        <BrandStory />
+        <FromBlog posts={posts} />
+        <Faq />
+      </Container>
     </>
   );
 }

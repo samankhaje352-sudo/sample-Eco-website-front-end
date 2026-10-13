@@ -195,6 +195,13 @@ body {
 | `sale*` | discounted final price, percent badge | errors, hearts, anything else |
 | `success/warning/danger` + `-soft` | status badges, inline form errors (danger), stock warning (warning), discount line in totals (success) | decoration |
 
+### 2.2.1 Added tokens (2026-10, light and both dark blocks)
+| Token | Light / Dark | Use |
+|---|---|---|
+| `--well-edge` (`well-edge` utility) | ink 7% / ink 9% | 1px inner hairline on every image well (ProductCard, hero tiles, Gallery, blog covers) so light garments and charcoal backdrops keep an edge in both themes. Element must be positioned and `overflow-hidden`. |
+| `--stage` (`bg-stage`) | `#FCFCFC` / `#C9D2D1` | Light disc behind category cut-out garments so dark garments never sink into an ink or dark tile. Category bento only. |
+| `--weave` (`weave` utility) | accent 9% / accent 8% | Diagonal twill texture (the weft idea behind «پود»). Brand-story panel only. |
+
 ### 2.3 Contrast (WCAG 2.x, computed)
 
 Light mode:
@@ -386,6 +393,7 @@ Structure (`<article class="group relative flex flex-col">`):
    - Price block: `<Price size="card">` (handles discount, percent badge, sold-out text).
 - No border, no shadow, no card background: the image well and spacing group the card.
 - Grid (`ProductGrid`): `grid grid-cols-2 gap-x-3 gap-y-8 md:grid-cols-3 md:gap-x-5 xl:grid-cols-4 xl:gap-x-6` (catalog with sidebar uses `lg:grid-cols-3` and never 4). Render as `<ul>`/`<li>`.
+- Image link also carries `well-edge` (2.2.1).
 - Rail variant (home discounted section): same card at fixed width `w-[44vw] max-w-56 md:w-60 shrink-0 snap-start`.
 
 ### 4.13 Header (`components/Header.tsx`)
@@ -396,12 +404,10 @@ Structure (`<article class="group relative flex flex-col">`):
 - Mobile menu drawer: backdrop `fixed inset-0 z-40 bg-overlay` (fade `transition-opacity duration-300`); panel `fixed inset-y-0 start-0 z-50 w-[82vw] max-w-80 bg-surface shadow-pop flex flex-col` sliding from `translate-x-full` (RTL: off-screen to the right) to `translate-x-0`, `transition-transform duration-300 ease-out-soft`. Top: logo + close `X`. Body: category links as large rows `h-12 px-4 flex items-center justify-between text-base font-medium` with `ChevronLeft size-4 text-ink-muted`, children (if any) as an indented list `ps-8 text-sm text-ink-muted`; then divider `border-t border-border my-2`; rows «علاقه‌مندی‌ها» (`Heart`), «سفارش‌های من» (`Package`), «حساب کاربری» or «ورود | ثبت‌نام» (`UserRound`). Focus trap, `Escape` closes, body scroll lock, focus returns to the menu button.
 
 ### 4.14 Footer
-`mt-16 bg-surface-muted border-t border-border`. Container `py-10 grid gap-8 md:grid-cols-[1.5fr_1fr_1fr]`.
-- Col 1: Logo, tagline `mt-3 text-sm text-ink-muted max-w-xs` «لباس روزمره، دوخت درست.», support line `mt-4 text-sm` «پشتیبانی: » + `<a dir="ltr" href="tel:02191004827">۰۲۱-۹۱۰۰۴۸۲۷</a>` and «شنبه تا پنجشنبه، ساعت ۹ تا ۱۸».
-- Col 2 title «دسته‌بندی‌ها» (`text-sm font-bold mb-3`): links مردانه، زنانه، بچگانه، تخفیف‌ها (`text-sm text-ink-muted hover:text-ink`, list `space-y-2`).
-- Col 3 title «خدمات مشتریان»: پیگیری سفارش (`/profile/orders`)، سبد خرید، حساب کاربری، آدرس‌ها.
-- Mobile: col 2 and 3 side by side (`grid-cols-2` wrapper inside), col 1 above.
-- Bottom bar: `border-t border-border py-4 text-xs text-ink-muted text-center` «© ۱۴۰۵ پود. همه حقوق محفوظ است.»
+`mt-16 bg-surface-muted border-t border-border`. Container `py-10 md:py-14 grid gap-10 lg:grid-cols-12`.
+- Brand column (`lg:col-span-4`): Logo; about line `mt-4 text-sm leading-7 text-ink-muted` («لباس روزمره، دوخت درست.» + one plain sentence on what Pood sells); three promises `space-y-2`, each `Truck/RefreshCcw/ShieldCheck size-4 text-accent` + `text-sm text-ink` (free shipping over ۱ میلیون, size exchange ۷ days, bank gateway).
+- Link columns (`lg:col-span-8`, `grid-cols-2 sm:grid-cols-3`): «دسته‌بندی‌ها» (API categories + تخفیف‌ها), «خدمات مشتریان» (پیگیری سفارش، سبد خرید، حساب کاربری، آدرس‌ها), «از وبلاگ» (3 latest post titles, `line-clamp-1`, fetched client-side and fail-soft, then accent link «همه‌ی مقاله‌ها» → `/blog`). On phones the blog column spans both columns.
+- Bottom bar: `border-t`, container `flex-col sm:flex-row justify-between py-4 text-xs text-ink-muted`: copyright at start, support phone (`dir="ltr"`) + hours at end.
 
 ### 4.15 Section header (home and PDP related)
 `flex items-end justify-between gap-4 mb-5 md:mb-6`: `<h2 class="text-xl md:text-2xl font-bold text-ink">` + Button `link` sm «مشاهده همه» with `iconEnd={<ChevronLeft className="size-4"/>}`. No subtitle, no eyebrow.
@@ -464,6 +470,10 @@ Section order:
    - `RefreshCcw`: «تعویض سایز» / «تا ۷ روز پس از تحویل»
    - `ShieldCheck`: «پرداخت امن» / «از طریق درگاه بانکی»
 5. **Discounted rail** `py-10 md:py-16`: section header «تخفیف‌دارها» + «مشاهده همه» → `/products?ordering=discount`. Horizontal scroll-snap rail (different layout family from #3): `rail -mx-4 px-4 md:mx-0 md:px-0 flex gap-3 md:gap-5 overflow-x-auto snap-x snap-mandatory scroll-px-4 pb-2` with ProductCard rail variant. Desktop (md+) adds two buttons in the section header next to «مشاهده همه»: secondary icon-only sm `ChevronRight` («قبلی») and `ChevronLeft` («بعدی») that `scrollBy` ±80% of rail width (smooth only if motion-safe).
+6. **Brand story** (`components/home/BrandStory.tsx`) `py-10 md:py-16`: one `rounded-lg bg-accent-soft weave p-6 md:p-12` panel, `md:grid-cols-12`. Start (`col-span-5`): decorative wordmark «پود» `text-6xl md:text-8xl font-black text-accent` (`aria-hidden`), H2 «رشته‌ای که پارچه را نگه می‌دارد», one short paragraph on the weaving meaning. End (`col-span-7`): 3 promises stacked vertically (NOT 3 columns), each `rounded-lg bg-surface p-5 shadow-card` with a `size-11 rounded-md bg-accent-soft` icon tile (`Shirt`, `Tag`, `Layers`), bold title + one-line body. Claims stay verifiable (description on PDP, struck price shown, simple palette).
+7. **From the blog** (`components/home/FromBlog.tsx`) `py-10 md:py-16`: section header «از وبلاگ پود» + «مشاهده همه» → `/blog`. `lg:grid-cols-12`: newest post as PostCard `lead` (`col-span-7`), next three as PostCard `row` in a `divide-y` stack (`col-span-5`). Data `api.blog.posts()`; on error or zero posts the section is hidden.
+8. **FAQ** (`components/home/Faq.tsx`) `py-10 md:py-16`: `md:grid-cols-12`; start `col-span-4`: H2 «پرسش‌های پرتکرار», one line, support phone card (`Phone` tile, number `dir="ltr"`, hours). End `col-span-8`: native `<details>` list `gap-3`, each `rounded-lg border bg-surface open:border-border-strong`; `<summary>` `px-5 py-4 font-bold` with a `size-8 rounded-md bg-surface-muted` `Plus` that rotates 45° when open (`group-open:rotate-45`); first item open. Answers `text-sm leading-7 text-ink-muted`, optional accent link. Same array feeds a `FAQPage` JSON-LD via `JsonLd`. Policy facts only: free shipping over ۱ میلیون تومان, otherwise flat ۵۰ هزار تومان; size exchange within ۷ days of delivery; bank gateway payment; damaged/wrong item → contact support; tracking in «سفارش‌های من».
+- Category bento update (`components/home/CategoryBento.tsx`): height `md:h-[32rem]`; each tile is a `div` with a stretched name link (`after:absolute after:inset-0`), sub-category chips from `api.catalog.categories()` children (`h-8 rounded-md px-3 text-xs`, parent name stripped: «پیراهن و تی‌شرت»; chips hidden on small mobile tiles; tree fetch is fail-soft), and the category cut-out centred on a `bg-stage` disc inside an `aspect-[4/5]` box at the end-bottom corner (`motion-safe:group-hover:scale-[1.04]`). The «مشاهده محصولات» row is hidden on the two small tiles below `md` (the whole tile is the link). The stage disc is the one decorative `rounded-full` on the site.
 - Empty arrays: hide that section entirely. Loading: hero visual block skeleton + grid skeletons.
 
 ### 5.2 Catalog `/products`
@@ -574,6 +584,11 @@ H1 row `flex items-center justify-between mb-6`: H1 «آدرس‌ها» + second
 ### 5.13 Not found / global error
 `not-found.tsx`: EmptyState `SearchX`, «صفحه‌ای که دنبالش بودید پیدا نشد», «نشانی را بررسی کنید یا به صفحه اصلی بروید.», action «بازگشت به صفحه اصلی». `error.tsx`: `CircleAlert` in `bg-danger-soft text-danger` tile, «مشکلی پیش آمد», «لطفاً دوباره تلاش کنید.», action «تلاش دوباره» (calls `reset`).
 
+### 5.15 Blog `/blog` and `/blog/[slug]`
+- Shared pieces in `components/blog/`: `PostMeta` (date, `Clock` + reading time, optional author; spaced spans, never `·`), `PostCard` variants `grid` (16:9 cover on top), `feature` (cover `md:col-span-7` beside text, title `text-2xl md:text-3xl`, accent «خواندن مقاله» + `ArrowLeft`), `lead` (grid with `text-xl md:text-2xl` title), `row` (`7rem/9rem` 4:3 thumb beside a 2-line title). All covers use `well-edge`.
+- Index: breadcrumb, header with H1 «وبلاگ پود» + one line, `border-b pb-6`. Page 1 leads with the newest post as `feature`; the rest in `sm:grid-cols-2 lg:grid-cols-3`.
+- Article: header and body share the `max-w-prose` column (title, PostMeta with author); cover breaks out to `max-w-3xl`; excerpt as lead `border-s-2 border-accent ps-4 text-lg text-ink`. Body: H2 gets `border-t pt-8`, lists sit in a `rounded-lg bg-surface` box with accent markers. After the body an `aside` `bg-accent-soft rounded-lg` «اگر از پود خرید می‌کنید» with size exchange and free shipping facts. Then «محصولات مرتبط با این مقاله» and «بیشتر بخوانید» (3 other posts, fail-soft; falls back to the «همه‌ی مقاله‌ها» button), each separated by `border-t pt-10 md:pt-12`.
+
 ### 5.14 CTA intent registry (one label per intent, everywhere)
 | Intent | Label |
 |---|---|
@@ -627,7 +642,7 @@ H1 row `flex items-center justify-between mb-6`: H1 «آدرس‌ها» + second
 - [ ] Hero: H1 ≤ 2 lines at desktop, sub ≤ 20 words, CTAs visible without scrolling on 375x667 and 1440x900, top padding ≤ `pt-12`.
 - [ ] Zero eyebrows, zero section numbers, zero step labels, zero scroll cues, zero decorative dots (color dots are real data), zero middle-dot chains.
 - [ ] No labels overlaid on product images; only the wishlist button.
-- [ ] Home uses distinct layout families: split hero, bento, grid, icon strip, horizontal rail.
+- [ ] Home uses distinct layout families: split hero, bento, grid, icon strip, horizontal rail, tinted story panel, editorial lead + rows, side-headed accordion.
 - [ ] No fake data: no star ratings, no "viewers now" counters, no invented review quotes.
 - [ ] `prefers-reduced-motion`: zoom, slide, pulse, spin all neutralized (global block + `motion-safe:`).
 - [ ] `min-h-dvh` only, never `h-screen`/`min-h-screen`.

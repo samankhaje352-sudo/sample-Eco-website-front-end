@@ -44,7 +44,7 @@ export default function Gallery({ images, name }: { images: GalleryImage[]; name
 
   if (n === 0) {
     return (
-      <div className="-mx-4 grid aspect-[4/5] place-items-center overflow-hidden bg-surface-muted md:mx-0 md:rounded-lg">
+      <div className="well-edge relative -mx-4 grid aspect-[4/5] place-items-center overflow-hidden bg-surface-muted md:mx-0 md:rounded-lg">
         <Shirt className="size-10 text-ink-subtle" strokeWidth={1.75} aria-hidden />
       </div>
     );
@@ -52,7 +52,7 @@ export default function Gallery({ images, name }: { images: GalleryImage[]; name
 
   return (
     <div>
-      <div className="-mx-4 overflow-hidden rounded-none md:mx-0 md:rounded-lg">
+      <div className="well-edge relative -mx-4 overflow-hidden rounded-none md:mx-0 md:rounded-lg">
         <ul ref={railRef} className="rail flex snap-x snap-mandatory overflow-x-auto bg-surface-muted">
           {images.map((img, i) => (
             <li

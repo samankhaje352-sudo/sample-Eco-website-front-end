@@ -53,7 +53,7 @@ export default function ProductCard({
         className,
       )}
     >
-      <Link href={href} className="relative block aspect-[4/5] overflow-hidden rounded-lg bg-surface-muted" tabIndex={-1}>
+      <Link href={href} className="well-edge relative block aspect-[4/5] overflow-hidden rounded-lg bg-surface-muted" tabIndex={-1}>
         {p.main_image ? (
           <Image
             src={p.main_image}

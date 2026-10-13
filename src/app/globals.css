@@ -29,6 +29,9 @@
   --danger-soft: #FCE8E6;
   --overlay: rgb(21 25 26 / 0.45);
   --shadow-color: 192 10% 10%;
+  --well-edge: rgb(21 25 26 / 0.07);  /* hairline inside image wells */
+  --weave: rgb(11 107 102 / 0.09);    /* twill texture on the brand panel */
+  --stage: #FCFCFC;                   /* light disc behind garment cut-outs (category tiles) */
 }
 
 /* Dark: explicit choice via the header toggle. */
@@ -60,6 +63,9 @@
   --danger-soft: #3A1A18;
   --overlay: rgb(0 0 0 / 0.6);
   --shadow-color: 200 20% 2%;
+  --well-edge: rgb(236 239 239 / 0.09);
+  --weave: rgb(77 182 173 / 0.08);
+  --stage: #C9D2D1;
 }
 
 /* Dark: follow the OS when the user has not chosen. */
@@ -92,6 +98,9 @@
     --danger-soft: #3A1A18;
     --overlay: rgb(0 0 0 / 0.6);
     --shadow-color: 200 20% 2%;
+    --well-edge: rgb(236 239 239 / 0.09);
+    --weave: rgb(77 182 173 / 0.08);
+    --stage: #C9D2D1;
   }
 }
 
@@ -123,6 +132,8 @@
   --color-danger: var(--danger);
   --color-danger-soft: var(--danger-soft);
   --color-overlay: var(--overlay);
+  --color-well-edge: var(--well-edge);
+  --color-stage: var(--stage);
 
   --shadow-card: 0 1px 2px hsl(var(--shadow-color) / 0.06), 0 2px 8px -2px hsl(var(--shadow-color) / 0.08);
   --shadow-pop: 0 4px 12px -2px hsl(var(--shadow-color) / 0.12), 0 16px 40px -8px hsl(var(--shadow-color) / 0.18);
@@ -181,3 +192,25 @@ body {
 
 /* DESIGN.md 3.3: all lucide icons use a 1.75 stroke. */
 .lucide { stroke-width: 1.75; }
+
+/* Image wells: 1px inner hairline so light garments / dark backdrops keep an edge in both themes.
+   The element must be positioned (relative/absolute) and clip its image (overflow-hidden). */
+@utility well-edge {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px var(--well-edge);
+    pointer-events: none;
+  }
+}
+
+/* Twill texture (the "pood" weft idea). Brand panel only. */
+@utility weave {
+  background-image: repeating-linear-gradient(-45deg, var(--weave) 0 1px, transparent 1px 7px);
+}
+
+/* Native <details> FAQ: hide the default disclosure marker. */
+.faq summary { list-style: none; }
+.faq summary::-webkit-details-marker { display: none; }

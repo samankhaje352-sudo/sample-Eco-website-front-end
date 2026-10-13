@@ -54,6 +54,9 @@ export default async function BlogPage({ searchParams }: Props) {
   }
 
   const pageCount = Math.ceil(data.count / BLOG_PAGE_SIZE);
+  // Page 1 leads with the newest post as a wide feature; the rest go in the grid.
+  const featured = page === 1 ? data.results[0] : undefined;
+  const rest = featured ? data.results.slice(1) : data.results;
 
   return (
     <Container className="pb-16 pt-6 md:pt-10">
@@ -73,20 +76,27 @@ export default async function BlogPage({ searchParams }: Props) {
         }}
       />
       <Breadcrumb items={[{ label: "خانه", href: "/" }, { label: "وبلاگ" }]} />
-      <h1 className="mt-4 text-3xl font-extrabold text-ink">وبلاگ پود</h1>
-      <p className="mt-2 max-w-prose text-base text-ink-muted">
-        راهنمای خرید، نگهداری و ست کردن لباس؛ کوتاه و کاربردی.
-      </p>
+      <header className="mt-4 border-b border-border pb-6 md:pb-8">
+        <h1 className="text-3xl font-extrabold text-ink md:text-4xl">وبلاگ پود</h1>
+        <p className="mt-3 max-w-prose text-base text-ink-muted md:text-lg">
+          راهنمای خرید، نگهداری و ست کردن لباس؛ کوتاه و کاربردی.
+        </p>
+      </header>
 
       {data.results.length === 0 ? (
         <EmptyState icon={BookOpen} title="هنوز مقاله‌ای منتشر نشده است." />
       ) : (
         <>
-          <div className="mt-8 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-            {data.results.map((post, i) => (
-              <PostCard key={post.id} post={post} priority={i < 3} />
-            ))}
-          </div>
+          {featured && (
+            <PostCard post={featured} variant="feature" as="h2" priority className="mt-8 md:mt-10" />
+          )}
+          {rest.length > 0 && (
+            <div className="mt-12 grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+              {rest.map((post, i) => (
+                <PostCard key={post.id} post={post} as="h2" priority={!featured && i < 3} />
+              ))}
+            </div>
+          )}
           <Pagination
             page={page}
             pageCount={pageCount}

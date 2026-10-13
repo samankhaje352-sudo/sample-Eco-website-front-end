@@ -17,6 +17,7 @@
 
 ### متغیرهای محیطی
 - `NEXT_PUBLIC_API_URL` — آدرس API به‌همراه نسخه (پیش‌فرض `http://localhost:8000/api/v1`).
+- `NEXT_PUBLIC_SITE_URL` — آدرس عمومی سایت برای لینک‌های canonical، نقشه سایت و Open Graph (پیش‌فرض `http://localhost:3000`).
 
 نسخه‌ی API فقط در `src/lib/api/config.ts` (`API_VERSION`) تعریف شده است.
 
@@ -41,6 +42,7 @@ The mock OTP is always `12345`. The mock payment gateway redirects back to `/che
 
 ### Env vars
 - `NEXT_PUBLIC_API_URL` — API base incl. version (default `http://localhost:8000/api/v1`).
+- `NEXT_PUBLIC_SITE_URL` — public URL of the storefront, used for canonical links, `sitemap.xml`, `robots.txt` and Open Graph (default `http://localhost:3000`). Set it in production.
 
 The API version is a single constant: `API_VERSION` in `src/lib/api/config.ts`. Images are allowed from `localhost:8000` in `next.config.ts`; add hosts there for production.
 
