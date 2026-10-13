@@ -1,8 +1,8 @@
 import { ApiClient, type RequestOptions } from "./client";
 import type {
   Address, AddressInput, Cart, CartLineInput, Category, FilterOptions, HomeData,
-  OrderDetail, OrderList, Paginated, ProductDetail, ProductList, ProductQuery,
-  User, VerifyResponse,
+  OrderDetail, OrderList, Paginated, PostDetail, PostList, ProductDetail, ProductList,
+  ProductQuery, User, VerifyResponse,
 } from "./types";
 
 class Resource {
@@ -49,6 +49,19 @@ export class CatalogApi extends Resource {
   }
   home(o?: RequestOptions) {
     return this.client.get<HomeData>("home/", undefined, this.opts(o));
+  }
+}
+
+/** Public blog endpoints; safe in server components. */
+export class BlogApi extends Resource {
+  private opts(o?: RequestOptions): RequestOptions {
+    return { auth: false, revalidate: 300, ...o };
+  }
+  posts(page?: number, o?: RequestOptions) {
+    return this.client.get<Paginated<PostList>>("blog/posts/", { page }, this.opts(o));
+  }
+  post(slug: string, o?: RequestOptions) {
+    return this.client.get<PostDetail>(`blog/posts/${encodeURIComponent(slug)}/`, undefined, this.opts(o));
   }
 }
 

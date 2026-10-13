@@ -1,6 +1,6 @@
 import { ApiClient } from "./client";
 import {
-  AddressApi, AuthApi, CartApi, CatalogApi, OrderApi, WishlistApi,
+  AddressApi, AuthApi, BlogApi, CartApi, CatalogApi, OrderApi, WishlistApi,
 } from "./resources";
 
 export * from "./types";
@@ -15,6 +15,7 @@ export class Api {
   readonly wishlist: WishlistApi;
   readonly addresses: AddressApi;
   readonly orders: OrderApi;
+  readonly blog: BlogApi;
   constructor(readonly client: ApiClient = new ApiClient()) {
     this.auth = new AuthApi(client);
     this.catalog = new CatalogApi(client);
@@ -22,6 +23,7 @@ export class Api {
     this.wishlist = new WishlistApi(client);
     this.addresses = new AddressApi(client);
     this.orders = new OrderApi(client);
+    this.blog = new BlogApi(client);
   }
 }
 

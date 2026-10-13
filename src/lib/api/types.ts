@@ -167,3 +167,23 @@ export interface CartLineInput {
   variant_id: number;
   quantity: number;
 }
+
+export interface PostList {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  cover: string | null;
+  author_name: string;
+  published_at: string;
+  published_at_jalali: string;
+  reading_time: number;
+}
+
+export type PostDetail = PostList & {
+  body: string;
+  meta_title: string;
+  meta_description: string;
+  updated_at: string;
+  related_products: ProductList[];
+};
