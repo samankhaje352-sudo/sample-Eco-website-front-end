@@ -8,7 +8,7 @@ import CatalogShell from "@/components/catalog/CatalogShell";
 import ClearFiltersButton from "@/components/catalog/ClearFiltersButton";
 import { PAGE_SIZE, countActiveFilters, flattenCategories, hrefWith, parseQuery } from "@/components/catalog/params";
 
-export const metadata: Metadata = { title: "محصولات | پود" };
+export const metadata: Metadata = { title: "محصولات" };
 
 type SP = Record<string, string | string[] | undefined>;
 

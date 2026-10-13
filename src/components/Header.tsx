@@ -7,6 +7,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import Logo from "@/components/Logo";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useCategories } from "@/components/useCategories";
 import { Button, Container, Drawer, controlClasses } from "@/components/ui";
 import { cn } from "@/lib/cn";
@@ -87,6 +88,7 @@ function HeaderInner() {
 
   const activeCategory = pathname === "/products" ? params.get("category") : null;
   const onDiscount = pathname === "/products" && params.get("ordering") === "discount" && !activeCategory;
+  const onBlog = pathname.startsWith("/blog");
   const query = pathname === "/products" ? (params.get("search") ?? "") : "";
 
   // Close overlays on navigation.
@@ -157,6 +159,15 @@ function HeaderInner() {
                   تخفیف‌ها
                 </Link>
               </li>
+              <li>
+                <Link
+                  href="/blog"
+                  aria-current={onBlog ? "page" : undefined}
+                  className={cn(navLink, onBlog ? "bg-accent-soft text-accent-strong" : "text-ink")}
+                >
+                  وبلاگ
+                </Link>
+              </li>
             </ul>
           </nav>
 
@@ -173,6 +184,7 @@ function HeaderInner() {
             >
               <Search />
             </Button>
+            <ThemeToggle />
             <div className="hidden lg:block">
               <IconLink href="/profile/wishlist" label={wishLabel} icon={Heart} count={wishN} />
             </div>
@@ -238,6 +250,9 @@ function HeaderInner() {
               <MenuRow href="/products?ordering=discount" className="text-sale">
                 تخفیف‌ها
               </MenuRow>
+            </li>
+            <li>
+              <MenuRow href="/blog">وبلاگ</MenuRow>
             </li>
           </ul>
           <ul className="my-2 border-t border-border pt-2">

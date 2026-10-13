@@ -3,9 +3,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { api, ApiError, type ProductDetail } from "@/lib/api";
 import AddToCart from "@/components/AddToCart";
+import JsonLd from "@/components/JsonLd";
 import ProductGrid from "@/components/ProductGrid";
 import Gallery from "@/components/product/Gallery";
 import { Breadcrumb, Container, Price, SectionHeader } from "@/components/ui";
+import { SITE_NAME, SITE_URL } from "@/lib/site";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -22,9 +24,20 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
   try {
     const p = await api.catalog.product(slug, { revalidate: 60 });
-    return { title: `${p.name} | پود` };
+    return {
+      title: p.name,
+      description: (p.description || `${p.name} در فروشگاه پود`).slice(0, 160),
+      alternates: { canonical: `/products/${p.slug}` },
+      openGraph: {
+        type: "website",
+        url: `/products/${p.slug}`,
+        title: p.name,
+        description: (p.description || p.name).slice(0, 160),
+        images: p.main_image ? [{ url: p.main_image, alt: p.name }] : undefined,
+      },
+    };
   } catch {
-    return { title: "محصول | پود" };
+    return { title: "محصول" };
   }
 }
 
@@ -39,6 +52,39 @@ export default async function ProductPage({ params }: Params) {
 
   return (
     <Container className="pb-16 pt-6 md:pt-10">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Product",
+              name: product.name,
+              description: product.description || undefined,
+              image: images.length ? images.map((i) => i.url) : undefined,
+              sku: String(product.id),
+              category: product.category.name,
+              brand: { "@type": "Brand", name: SITE_NAME },
+              offers: {
+                "@type": "Offer",
+                url: `${SITE_URL}/products/${product.slug}`,
+                priceCurrency: "IRR",
+                // API prices are in Toman; schema.org needs an ISO currency code, and IRR = Toman × 10.
+                price: product.final_price * 10,
+                availability: product.is_available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+                itemCondition: "https://schema.org/NewCondition",
+              },
+            },
+            {
+              "@type": "BreadcrumbList",
+              itemListElement: [
+                { "@type": "ListItem", position: 1, name: "خانه", item: `${SITE_URL}/` },
+                { "@type": "ListItem", position: 2, name: product.category.name, item: `${SITE_URL}/products?category=${product.category.slug}` },
+                { "@type": "ListItem", position: 3, name: product.name },
+              ],
+            },
+          ],
+        }}
+      />
       <Breadcrumb
         items={[
           { label: "خانه", href: "/" },

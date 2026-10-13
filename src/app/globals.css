@@ -31,8 +31,40 @@
   --shadow-color: 192 10% 10%;
 }
 
+/* Dark: explicit choice via the header toggle. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0F1213;
+  --surface: #171B1C;
+  --surface-muted: #22282A;
+  --ink: #ECEFEF;
+  --ink-muted: #A4ADAF;
+  --ink-subtle: #869093;
+  --border: #2D3436;
+  --border-strong: #5E686B;
+  --primary: #ECEFEF;
+  --primary-hover: #D9DEDF;
+  --primary-contrast: #15191A;
+  --accent: #4DB6AD;
+  --accent-strong: #7FD3CB;
+  --accent-soft: #16302E;
+  --accent-contrast: #0F1213;
+  --sale: #FF7B6E;
+  --sale-soft: #3A1D1A;
+  --sale-contrast: #15191A;
+  --success: #5CC98C;
+  --success-soft: #16301F;
+  --warning: #F2B45A;
+  --warning-soft: #35270F;
+  --danger: #FF8A80;
+  --danger-soft: #3A1A18;
+  --overlay: rgb(0 0 0 / 0.6);
+  --shadow-color: 200 20% 2%;
+}
+
+/* Dark: follow the OS when the user has not chosen. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #0F1213;
     --surface: #171B1C;
